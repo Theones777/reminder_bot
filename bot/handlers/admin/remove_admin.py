@@ -1,12 +1,11 @@
 from aiogram import Router
-from aiogram.filters import StateFilter, Command, CommandObject
+from aiogram.filters import StateFilter, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.clients.init_clients import storage_client
 from bot.states import RemoveAdmin
 from bot.utils import format_users_list
-from config import Config
 
 remove_admin_router = Router()
 
@@ -22,9 +21,8 @@ async def id_inserted(msg: Message, state: FSMContext):
 
 
 @remove_admin_router.message(StateFilter(None), Command("remove_admin"))
-async def remove_admin_handler(msg: Message, command: CommandObject, state: FSMContext):
-    if command.args == Config.ADMIN_PHRASE:
-        admins_list = await format_users_list(await storage_client.get_admins_list())
-        await msg.answer(
-            text=f"Введите id того, у кого необходимо забрать права администратора:\n{admins_list}")
-        await state.set_state(RemoveAdmin.remove_id)
+async def remove_admin_handler(msg: Message, state: FSMContext):
+    admins_list = await format_users_list(await storage_client.get_admins_list())
+    await msg.answer(
+        text=f"Введите id того, у кого необходимо забрать права администратора:\n{admins_list}")
+    await state.set_state(RemoveAdmin.remove_id)

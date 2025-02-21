@@ -40,3 +40,11 @@ async def cancel_handler(msg: Message, state: FSMContext):
     await state.set_data({})
     await state.clear()
     await msg.answer("Возврат к началу", reply_markup=ReplyKeyboardRemove())
+
+
+@common_router.message(StateFilter("*"), Command(commands=["register"]))
+async def add_admin_handler(msg: Message, command: CommandObject, state: FSMContext):
+    if command.args == Config.ADMIN_PHRASE:
+        if user_name := await storage_client.add_new_admin(msg.from_user.id):
+            await msg.answer(text=f"{user_name} добавлен в список администраторов")
+            await state.clear()
