@@ -13,6 +13,7 @@ common_router = Router()
 
 @common_router.message(StateFilter("*"), Command(commands=["start"]))
 async def message_start_handler(msg: Message, state: FSMContext):
+    await state.set_data({})
     await state.clear()
 
     user_id: int = msg.from_user.id

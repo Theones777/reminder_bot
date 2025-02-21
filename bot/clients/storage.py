@@ -184,6 +184,5 @@ class Storage:
         if created:
             logger.info(f"Событие {event_obj.event_name} заполнено {user_obj.full_name}")
             return True
-        else:  # todo delete in prod
-            logger.warning(f"Событие {event_obj.event_name} уже есть от {user_obj.full_name}")
+
         return False
