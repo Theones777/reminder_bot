@@ -128,10 +128,10 @@ async def mailing(
 
 
 async def remind(bot: Bot):
-    # while True: TODO
+    while True:
         await mailing(bot, MAILING_MESSAGE)
         logger.info("Make remind mailing")
-        # await asyncio.sleep(Config.REMIND_TIMEOUT)
+        await asyncio.sleep(Config.REMIND_TIMEOUT)
 
 
 async def format_users_list(users_list: list) -> str:
