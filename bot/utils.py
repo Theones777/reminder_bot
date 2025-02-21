@@ -180,15 +180,14 @@ async def make_not_filled_message():
 
 async def sync_db_to_gs(event_id: int):
     df_dict = {}
-
-    db_events_data = await storage_client.get_sync_filled_events(event_id)
-    event_name, event_date, event_info = db_events_data[0]
-    filled_events_data = db_events_data[1]
-    page_name = f"{event_name}_{event_date}"
-    columns = [col_name.strip() for col_name in event_info.split(",")]
-    for col in columns:
-        df_dict[col] = []
     try:
+        db_events_data = await storage_client.get_sync_filled_events(event_id)
+        event_name, event_date, event_info = db_events_data[0]
+        filled_events_data = db_events_data[1]
+        page_name = f"{event_name}_{event_date}"
+        columns = [col_name.strip() for col_name in event_info.split(",")]
+        for col in columns:
+            df_dict[col] = []
         for user_input_raw in filled_events_data:
             user_input = [el.strip() for el in user_input_raw.split(Config.SEPARATOR)]
             for i, data in enumerate(user_input):

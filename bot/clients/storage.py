@@ -85,6 +85,7 @@ class Storage:
     async def remove_admin(user_id: int):
         admin = await Users.filter(tg_id=user_id).first()
         admin.admin = False
+        await admin.save()
         return admin.full_name
 
     @staticmethod
@@ -123,7 +124,7 @@ class Storage:
 
         # delete region
         for event in await Events.all():
-            if datetime.strptime(event.event_date, "%d.%m.%Y") + timedelta(days=30) < datetime.now():
+            if datetime.strptime(event.event_date, "%d.%m.%Y") + timedelta(days=Config.EVENT_LIFETIME) < datetime.now():
                 logger.info(f"Событие {event.event_name} удалено")
                 await event.delete()
 

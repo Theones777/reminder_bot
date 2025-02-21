@@ -5,7 +5,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-# from bot.handlers.admin.init_handler import admin_router
+from bot.handlers.admin.init_handler import admin_router
 from bot.handlers.user import user_router
 from bot.handlers.common import common_router
 from bot.utils import set_commands, remind
@@ -21,7 +21,7 @@ async def main():
 
     # include routers
     dp.include_router(common_router)
-    # dp.include_router(admin_router)
+    dp.include_router(admin_router)
     dp.include_router(user_router)
 
     # set menu buttons
