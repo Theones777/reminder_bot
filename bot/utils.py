@@ -167,14 +167,16 @@ async def make_not_filled_message():
         if user_id not in filled_events_dict:
             for event_name, event_data in events_info_dict.items():
                 event_callback_data, event_date = event_data
-                user_str += f"{event_name}_{event_date} "
+                user_str += f"{event_name}_{event_date}, "
         else:
             for event_name, event_data in events_info_dict.items():
                 event_callback_data, event_date = event_data
                 if f"{event_name}_{event_date}" not in filled_events_dict[user_id]:
-                    user_str += f"{event_name}_{event_date} "
+                    user_str += f"{event_name}_{event_date}, "
         if user_str:
-            result += f"{user_str}\n"
+            user_name = await storage_client.get_user_name(user_id)
+            user_str = f"{user_name} - {user_str}"
+            result += f"{user_str}\n\n"
     return result
 
 

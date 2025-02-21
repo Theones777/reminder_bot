@@ -119,8 +119,6 @@ class Storage:
             )
             if created:
                 logger.info(f"Новое событие {event_name} добавлено")
-            else:  # todo delete in prod
-                logger.warning(f"Событие {event_name} уже существует")
 
         # delete region
         for event in await Events.all():
