@@ -1,0 +1,6 @@
+aiogram==3.17.0
+python-dotenv==1.0.1
+gspread==6.1.4
+pandas==2.2.3
+tortoise-orm==0.24.0
+transliterate==1.10.2
