@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from datetime import datetime, time, timedelta
 from enum import Enum
 
 import pandas as pd
@@ -83,21 +84,19 @@ async def make_buttons_dict(filled_events: list, all_users_list: list, events_in
         user_id = user_info[0]
         buttons_dict[user_id] = []
         if user_id not in filled_events_dict:
-            for event_name, event_data in events_info_dict.items():
-                event_callback_data, event_date = event_data
+            for event_name, (event_callback_data, event_date) in events_info_dict.items():
                 buttons_dict[user_id].append(
                     {
-                        "text": f"{event_name}_{event_date}",
+                        "text": event_name,
                         "callback_data": event_callback_data,
                     }
                 )
         else:
-            for event_name, event_data in events_info_dict.items():
-                event_callback_data, event_date = event_data
+            for event_name, (event_callback_data, event_date) in events_info_dict.items():
                 if f"{event_name}_{event_date}" not in filled_events_dict[user_id]:
                     buttons_dict[user_id].append(
                         {
-                            "text": f"{event_name}_{event_date}",
+                            "text": event_name,
                             "callback_data": event_callback_data,
                         }
                     )
@@ -106,15 +105,22 @@ async def make_buttons_dict(filled_events: list, all_users_list: list, events_in
     return buttons_dict
 
 
+async def get_buttons_dict():
+
+    all_users_list = await storage_client.get_all_users_list()
+    filled_events = await storage_client.get_filled_events()
+    events_info = await storage_client.get_remind_events_info()
+    buttons_dict = await make_buttons_dict(filled_events, all_users_list, events_info)
+
+    return buttons_dict
+
+
 async def mailing(
         bot: Bot,
         mailing_message: str,
 ):
     await storage_client.update_events(await gs_client.get_all_events())
-    all_users_list = await storage_client.get_all_users_list()
-    filled_events = await storage_client.get_filled_events()
-    events_info = await storage_client.get_remind_events_info()
-    buttons_dict = await make_buttons_dict(filled_events, all_users_list, events_info)
+    buttons_dict = await get_buttons_dict()
 
     for user_id in buttons_dict.keys():
         try:
@@ -129,9 +135,19 @@ async def mailing(
 
 async def remind(bot: Bot):
     while True:
+        now = datetime.now()
+        target_time = time(Config.REMIND_TIME, 0)
+
+        if now.time() > target_time:
+            next_run = datetime.combine(now.date(), target_time) + timedelta(days=1)
+        else:
+            next_run = datetime.combine(now.date(), target_time)
+
+        wait_seconds = (next_run - now).total_seconds()
+        await asyncio.sleep(wait_seconds)
+
         await mailing(bot, MAILING_MESSAGE)
         logger.info("Make remind mailing")
-        await asyncio.sleep(Config.REMIND_TIMEOUT)
 
 
 async def format_users_list(users_list: list) -> str:
@@ -177,6 +193,10 @@ async def make_not_filled_message():
             user_name = await storage_client.get_user_name(user_id)
             user_str = f"{user_name} - {user_str}"
             result += f"{user_str}\n\n"
+
+    if not result:
+        result = "все данные заполнены"
+
     return result
 
 
