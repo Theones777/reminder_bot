@@ -42,9 +42,7 @@ class Storage:
         os.makedirs("data", exist_ok=True)
         await Tortoise.init(db_url=Config.DB_URL, modules={"models": ["bot.clients.storage"]})
         await Tortoise.generate_schemas()
-        await Tortoise.get_connection("default").execute_script(
-            "PRAGMA journal_mode=WAL;"
-        )
+        await Tortoise.get_connection("default").execute_script("PRAGMA journal_mode=WAL;")
         logger.info(f"База данных проинициализирована")
 
     @staticmethod
@@ -59,8 +57,6 @@ class Storage:
         )
         if created:
             logger.info(f"Новый пользователь {user_full_name} добавлен")
-        else:
-            logger.info(f"Пользователь {user_full_name} уже существует")
 
     @staticmethod
     async def get_all_users_list() -> list:

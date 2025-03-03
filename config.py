@@ -13,6 +13,7 @@ class Config:
 
     DB_URL = getenv("DB_URL", "sqlite://data/database.db")
     EVENT_TEMPLATE_WORKSHEET_PREFIX = getenv("EVENT_TEMPLATE_WORKSHEET_PREFIX", "Шаблон")
-    REMIND_TIMEOUT = int(getenv("REMIND_TIMEOUT", 30))
+    REMIND_TIME = int(getenv("REMIND_TIME", 11))
+    DATA_ADMIN = getenv("DATA_ADMIN", "@test")
     SEPARATOR = ";;"
-    EVENT_LIFETIME = 30
+    EVENT_LIFETIME = 60
