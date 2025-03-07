@@ -22,6 +22,7 @@ class Events(Model):
     callback_data = fields.CharField(max_length=255)
     event_date = fields.CharField(max_length=255)
     start_remind_date = fields.CharField(max_length=255)
+    term_date = fields.CharField(max_length=255)
     event_info = fields.TextField()
 
 
@@ -37,13 +38,21 @@ class Storage:
     def __init__(self):
         run_async(self.init_db())
 
-    @staticmethod
-    async def init_db():
+    async def init_db(self):
         os.makedirs("data", exist_ok=True)
         await Tortoise.init(db_url=Config.DB_URL, modules={"models": ["bot.clients.storage"]})
         await Tortoise.generate_schemas()
         await Tortoise.get_connection("default").execute_script("PRAGMA journal_mode=WAL;")
+        await self.add_column_if_not_exists("Events", "term_date", "VARCHAR(255)")
         logger.info(f"База данных проинициализирована")
+
+    @staticmethod
+    async def add_column_if_not_exists(table_name: str, column_name: str, column_type: str):
+        connection = Tortoise.get_connection("default")
+        info = await connection.execute_query(f"PRAGMA table_info('{table_name}');")
+        if column_name not in [row["name"] for row in info[1]]:
+            await connection.execute_script(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type};")
+            logger.info(f"Новая колонка {column_name} добавлена в {table_name}")
 
     @staticmethod
     async def _get_callback_data(event_name: str, event_date: str) -> str:
@@ -102,7 +111,7 @@ class Storage:
     async def update_events(self, all_events_info: list):
         # update region
         for event_info in all_events_info:
-            event_name, event_date, event_data, start_remind_date = event_info
+            event_name, event_date, event_data, start_remind_date, term_date = event_info
             callback_data = await self._get_callback_data(event_name, event_date)
 
             event, created = await Events.get_or_create(
@@ -111,6 +120,7 @@ class Storage:
                 event_date=event_date,
                 start_remind_date=start_remind_date,
                 event_info=event_data,
+                term_date=term_date,
                 defaults={"event_name": event_name, "event_date": event_date},
             )
             if created:

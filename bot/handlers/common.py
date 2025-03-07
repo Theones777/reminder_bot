@@ -5,8 +5,8 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 from bot.clients.init_clients import storage_client
 from bot.clients.storage import Storage
-from bot.texts import START_ADMIN_MESSAGE, START_USER_MESSAGE, HELP_MESSAGE, MAILING_MESSAGE
-from bot.utils import make_inline_keyboard, get_buttons_dict
+from bot.texts import START_ADMIN_MESSAGE, START_USER_MESSAGE, HELP_MESSAGE
+from bot.utils import make_inline_keyboard, get_buttons_dict, create_user_mailing_message
 from config import Config
 
 common_router = Router()
@@ -31,7 +31,8 @@ async def message_start_handler(msg: Message, state: FSMContext):
     buttons_dict = await get_buttons_dict()
     buttons = buttons_dict.get(user_id)
     if buttons:
-        await msg.answer(MAILING_MESSAGE, reply_markup=await make_inline_keyboard(buttons))
+        mailing_message = await create_user_mailing_message(buttons)
+        await msg.answer(mailing_message, reply_markup=await make_inline_keyboard(buttons))
 
 
 @common_router.message(StateFilter("*"), Command("help"))
