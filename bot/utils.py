@@ -115,19 +115,27 @@ async def get_buttons_dict():
     return buttons_dict
 
 
-async def mailing(
-        bot: Bot,
-        mailing_message: str,
-):
+async def create_user_mailing_message(buttons: list) -> str:
+    message = MAILING_MESSAGE
+    for button in buttons:
+        event = await storage_client.get_event_with_callback_data(button.get("callback_data"))
+        if event.term_date:
+            message += f"\n<u>{button.get("text")}</u> - <b>{event.term_date}</b>"
+    return message
+
+
+async def mailing(bot: Bot):
     await storage_client.update_events(await gs_client.get_all_events())
     buttons_dict = await get_buttons_dict()
 
     for user_id in buttons_dict.keys():
+        buttons = buttons_dict[user_id]
+        mailing_message = await create_user_mailing_message(buttons)
         try:
             await bot.send_message(
                 chat_id=user_id,
                 text=mailing_message,
-                reply_markup=await make_inline_keyboard(buttons_dict[user_id]),
+                reply_markup=await make_inline_keyboard(buttons),
             )
         except Exception as e:
             logger.error(f"Ошибка рассылки для {user_id}: {e}")
@@ -146,7 +154,7 @@ async def remind(bot: Bot):
         wait_seconds = (next_run - now).total_seconds()
         await asyncio.sleep(wait_seconds)
 
-        await mailing(bot, MAILING_MESSAGE)
+        await mailing(bot)
         logger.info("Make remind mailing")
 
 
