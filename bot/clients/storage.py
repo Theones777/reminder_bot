@@ -140,10 +140,12 @@ class Storage:
             "callback_data",
             "event_date",
             "start_remind_date",
+            "term_date",
         )
+        now = datetime.now()
         for event_info in events_info:
-            if datetime.strptime(event_info[-1], "%d.%m.%Y") < datetime.now():
-                result.append(event_info[:-1])
+            if datetime.strptime(event_info[-2], "%d.%m.%Y") < now <= datetime.strptime(event_info[-1], "%d.%m.%Y"):
+                result.append(event_info[:-2])
         return result
 
     @staticmethod
