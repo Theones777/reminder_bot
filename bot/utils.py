@@ -125,7 +125,10 @@ async def create_user_mailing_message(buttons: list) -> str:
 
 
 async def mailing(bot: Bot):
-    await storage_client.update_events(await gs_client.get_all_events())
+    try:
+        await storage_client.update_events(await gs_client.get_all_events())
+    except Exception as e:
+        logger.error(f"Ошибка синхронизации данных Гугл:{e}")
     buttons_dict = await get_buttons_dict()
 
     for user_id in buttons_dict.keys():
