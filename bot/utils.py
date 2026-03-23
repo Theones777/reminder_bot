@@ -8,7 +8,7 @@ from aiogram import Bot
 from aiogram.types import (
     BotCommand,
     BotCommandScopeDefault,
-    InlineKeyboardButton,
+    InlineKeyboardButton, Message,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -38,7 +38,7 @@ async def make_inline_keyboard(buttons_info: list) -> InlineKeyboardBuilder:
     for button_info in buttons_info:
         builder.add(
             InlineKeyboardButton(
-                text=f"{button_info.get("text")}",
+                text=f"{button_info.get('text')}",
                 callback_data=button_info.get("callback_data")
             )
         )
@@ -120,7 +120,7 @@ async def create_user_mailing_message(buttons: list) -> str:
     for button in buttons:
         event = await storage_client.get_event_with_callback_data(button.get("callback_data"))
         if event.term_date:
-            message += f"\n<u>{button.get("text")}</u> - <b>{event.term_date}</b>"
+            message += f"\n<u>{button.get('text')}</u> - <b>{event.term_date}</b>"
     return message
 
 
@@ -231,3 +231,18 @@ async def sync_db_to_gs(event_id: int):
         traceback.print_exc()
         return False
     return True
+
+async def send_users_list(msg: Message, users_list: list):
+    header = "id - Имя пользователя\n"
+    current_message = header
+
+    for user_info in users_list:
+        line = f"{user_info[0]} - {user_info[1]}/{user_info[2]}\n"
+        if len(current_message) + len(line) > Config.MAX_MESSAGE_LENGTH:
+            await msg.answer(current_message)
+            current_message = header + line
+        else:
+            current_message += line
+
+    if current_message != header:
+        await msg.answer(current_message)

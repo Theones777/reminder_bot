@@ -17,3 +17,10 @@ class Config:
     DATA_ADMIN = getenv("DATA_ADMIN", "@test")
     SEPARATOR = ";;"
     EVENT_LIFETIME = 60
+    MAX_MESSAGE_LENGTH = 4000
+
+    PROXY_LOGIN = getenv("PROXY_LOGIN")
+    PROXY_PASSWORD = getenv("PROXY_PASSWORD")
+    PROXY_HOST = getenv("PROXY_HOST")
+    PROXY_PORT = getenv("PROXY_PORT")
+    PROXY_URL = f"http://{PROXY_LOGIN}:{PROXY_PASSWORD}@{PROXY_HOST}:{PROXY_PORT}"
